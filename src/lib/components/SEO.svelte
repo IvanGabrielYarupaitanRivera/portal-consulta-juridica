@@ -1,4 +1,6 @@
 <script lang="ts">
+	import favicon from '$lib/assets/favicon.svg';
+
 	interface SEOProps {
 		title?: string;
 		description?: string;
@@ -14,14 +16,14 @@
 	}
 
 	let {
-		title = 'Rony Vejarano Pérez - Candidato a la Alcaldía de Huancayo',
-		description = 'Ingeniero civil y candidato a la alcaldía de Huancayo. Comprometido con el bienestar social, servicios básicos de calidad y desarrollo sostenible. Experto en gestión pública con 17 años de experiencia.',
-		keywords = 'Rony Vejarano, alcalde Huancayo, candidato Huancayo, Batalla Perú, gestión pública, desarrollo urbano, transparencia, servicios básicos, infraestructura',
-		author = 'Rony Vejarano Pérez',
+		title = 'Portal de Consulta Jurídica',
+		description = 'Obtén asesoramiento legal rápido y sencillo. Haz preguntas sobre temas jurídicos sin necesidad de registrarte y recibe respuestas claras y concisas.',
+		keywords = 'consulta jurídica, asesoramiento legal, preguntas legales, derecho, abogados, Perú, consultas gratuitas',
+		author = 'Portal de Consulta Jurídica',
 		type = 'website',
-		image = 'https://ronyvejarano.pe/images/rony-vejarano-og.jpg',
-		url = 'https://ronyvejarano.pe',
-		siteName = 'Rony Vejarano Pérez - Oficial',
+		image = '/images/portal-juridico-og.jpg',
+		url = 'https://portal-consulta-juridica.com',
+		siteName = 'Portal de Consulta Jurídica',
 		locale = 'es_PE',
 		noindex = false,
 		nofollow = false
@@ -33,41 +35,26 @@
 		...(nofollow ? ['nofollow'] : ['follow'])
 	].join(', ');
 
-	// Datos estructurados JSON-LD para candidato político
+	// Datos estructurados JSON-LD para portal de consulta jurídica
 	const structuredData = {
 		'@context': 'https://schema.org',
-		'@type': 'Person',
-		name: 'Rony Vejarano Pérez',
-		jobTitle: 'Candidato a la Alcaldía de Huancayo',
+		'@type': 'WebSite',
+		name: 'Portal de Consulta Jurídica',
 		description: description,
-		image: image,
 		url: url,
+		potentialAction: {
+			'@type': 'SearchAction',
+			target: url + '/search?q={search_term_string}',
+			'query-input': 'required name=search_term_string'
+		},
 		mainEntityOfPage: {
 			'@type': 'WebPage',
 			'@id': url
 		},
-		sameAs: ['https://www.facebook.com/huancayo.rony.vejarano'],
-		address: {
-			'@type': 'PostalAddress',
-			addressLocality: 'Huancayo',
-			addressRegion: 'Junín',
-			addressCountry: 'PE'
-		},
-		affiliation: {
+		publisher: {
 			'@type': 'Organization',
-			name: 'Batalla Perú'
-		},
-		alumniOf: {
-			'@type': 'EducationalOrganization',
-			name: 'Universidad Nacional del Centro del Perú'
-		},
-		hasOccupation: {
-			'@type': 'Occupation',
-			name: 'Ingeniero Civil',
-			occupationLocation: {
-				'@type': 'City',
-				name: 'Huancayo'
-			}
+			name: 'Portal de Consulta Jurídica',
+			url: url
 		}
 	};
 </script>
@@ -85,10 +72,10 @@
 
 	<!-- Meta tags de idioma y región -->
 	<meta name="language" content="Spanish" />
-	<meta name="geo.region" content="PE-JUN" />
-	<meta name="geo.placename" content="Huancayo" />
-	<meta name="geo.position" content="-12.0653;-75.2049" />
-	<meta name="ICBM" content="-12.0653, -75.2049" />
+	<meta name="geo.region" content="PE" />
+	<meta name="geo.placename" content="Perú" />
+	<meta name="geo.position" content="-12.0464;-77.0428" />
+	<meta name="ICBM" content="-12.0464, -77.0428" />
 
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content={type} />
@@ -105,11 +92,10 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
 
-	<!-- Meta tags adicionales para SEO político -->
-	<meta name="political-candidate" content="Rony Vejarano Pérez" />
-	<meta name="election-type" content="municipal" />
-	<meta name="election-location" content="Huancayo, Junín, Perú" />
-	<meta name="political-party" content="Batalla Perú" />
+	<!-- Meta tags adicionales para SEO legal -->
+	<meta name="legal-portal" content="Portal de Consulta Jurídica" />
+	<meta name="service-type" content="consulta jurídica" />
+	<meta name="target-audience" content="público general" />
 
 	<!-- Canonical URL -->
 	<link rel="canonical" href={url} />
@@ -118,8 +104,8 @@
 	{@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
 
 	<!-- Favicon y iconos -->
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-	<link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+	<link rel="icon" type="image/png" sizes="32x32" href={favicon} />
+	<link rel="icon" type="image/png" sizes="16x16" href={favicon} />
+	<link rel="apple-touch-icon" sizes="180x180" href={favicon} />
 	<meta name="theme-color" content="#ffffff" />
 </svelte:head>
