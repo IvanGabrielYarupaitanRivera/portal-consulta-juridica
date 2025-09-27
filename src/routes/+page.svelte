@@ -1,11 +1,30 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
+	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
 	import { Send, Scale, Clock, Shield } from '@lucide/svelte';
+	import type { ActionResult } from '@sveltejs/kit';
 
 	let nombre = $state('');
 	let consulta = $state('');
 	let whatsapp = $state('');
-	let mensajes = $state([]);
-	let isLoading = $state(false);
+	let notificationSystem: NotificationSystem;
+
+	const handleCreateConsulta = () => {
+		notificationSystem.notify.loading('Registrando su consulta...');
+
+		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
+			await update();
+			notificationSystem.notify.hideLoading();
+
+			if (result.type === 'success') {
+				notificationSystem.notify.success(
+					result.data?.message || 'Su consulta ha sido registrada exitosamente'
+				);
+			} else if (result.type === 'failure') {
+				notificationSystem.notify.error(result.data?.message || 'Error al registrar consulta');
+			}
+		};
+	};
 </script>
 
 <!-- Hero Section -->
@@ -68,7 +87,12 @@
 
 		<!-- Form Area -->
 		<div class="border-t border-yellow-200 bg-gradient-to-b from-yellow-50 to-white p-6">
-			<form class="space-y-4">
+			<form
+				class="space-y-4"
+				method="POST"
+				use:enhance={handleCreateConsulta}
+				action="?/createConsulta"
+			>
 				<div class="grid gap-4 sm:grid-cols-2">
 					<!-- Nombre -->
 					<div class="space-y-2">
@@ -80,7 +104,7 @@
 							type="text"
 							bind:value={nombre}
 							required
-							disabled={isLoading}
+							name="nombre"
 							class="block w-full cursor-pointer rounded-lg border border-yellow-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-500 transition-colors focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
 							placeholder="Ingresa tu nombre"
 						/>
@@ -91,10 +115,10 @@
 						<label for="whatsapp" class="block text-sm font-medium text-gray-800">WhatsApp</label>
 						<input
 							id="whatsapp"
+							name="whatsapp"
 							type="tel"
 							bind:value={whatsapp}
 							required
-							disabled={isLoading}
 							class="block w-full cursor-pointer rounded-lg border border-yellow-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-500 transition-colors focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
 							placeholder="999999999"
 						/>
@@ -110,7 +134,7 @@
 						id="consulta"
 						bind:value={consulta}
 						required
-						disabled={isLoading}
+						name="mensaje"
 						rows="4"
 						class="block w-full cursor-pointer resize-none rounded-lg border border-yellow-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-500 transition-colors focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100"
 						placeholder="Describe tu situación legal o pregunta. Incluye todos los detalles relevantes para recibir la mejor asesoría..."
@@ -120,20 +144,14 @@
 				<!-- Submit Button -->
 				<button
 					type="submit"
-					disabled={isLoading || !nombre || !consulta || !whatsapp}
 					class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-500 px-6 py-3 font-medium text-white shadow-sm transition-all hover:from-yellow-700 hover:to-yellow-600 hover:shadow-md focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400 disabled:shadow-none"
 				>
-					{#if isLoading}
-						<div
-							class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-						></div>
-						Enviando...
-					{:else}
-						<Send class="h-5 w-5" />
-						Enviar Consulta
-					{/if}
+					<Send class="h-5 w-5" />
+					Enviar Consulta
 				</button>
 			</form>
 		</div>
 	</div>
 </section>
+
+<NotificationSystem bind:this={notificationSystem} />

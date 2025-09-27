@@ -17,7 +17,7 @@
 
 	const showToast = (message: string, type: ToastType): void => {
 		toast = { show: true, message, type };
-		setTimeout(() => (toast.show = false), 3000);
+		setTimeout(() => (toast.show = false), 5000);
 	};
 
 	const setLoading = (show: boolean, message: string = ''): void => {
