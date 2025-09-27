@@ -21,8 +21,8 @@
 		keywords = 'consulta jurídica, asesoramiento legal, preguntas legales, derecho, abogados, Perú, consultas gratuitas',
 		author = 'Portal de Consulta Jurídica',
 		type = 'website',
-		image = '/images/portal-juridico-og.jpg',
-		url = 'https://portal-consulta-juridica.com',
+		image = 'https://portal-consulta-juridica.vercel.app/images/portal-juridico-og.jpg',
+		url = 'https://portal-consulta-juridica.vercel.app/',
 		siteName = 'Portal de Consulta Jurídica',
 		locale = 'es_PE',
 		noindex = false,
@@ -104,8 +104,7 @@
 	{@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
 
 	<!-- Favicon y iconos -->
-	<link rel="icon" type="image/png" sizes="32x32" href={favicon} />
-	<link rel="icon" type="image/png" sizes="16x16" href={favicon} />
-	<link rel="apple-touch-icon" sizes="180x180" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
+	<link rel="apple-touch-icon" href={favicon} />
 	<meta name="theme-color" content="#ffffff" />
 </svelte:head>
