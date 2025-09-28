@@ -107,6 +107,23 @@ export const ConsultaDB = {
 		return data as GetConsulta[];
 	},
 
+	async readConsultasRespondidas(supabase: SupabaseClient) {
+		const { data, error } = await supabase
+			.from('consultas')
+			.select(
+				`
+				*,
+				id_abogado:perfiles(*)
+			`
+			)
+			.eq('estado', 'Respondida')
+			.order('responded_at', { ascending: false });
+		if (error) {
+			throw new Error('Error al leer consultas respondidas: ' + error.message);
+		}
+		return data as GetConsulta[];
+	},
+
 	async deleteConsulta(supabase: SupabaseClient, idConsulta: string) {
 		const { data, error } = await supabase
 			.from('consultas')
