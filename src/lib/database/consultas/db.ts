@@ -65,11 +65,16 @@ export const ConsultaDB = {
 	},
 
 	async responderConsulta(supabase: SupabaseClient, idConsulta: string, respuesta: string) {
+		const { data: userData } = await supabase.auth.getUser();
+		const idAbogado = userData?.user?.id ?? null;
+
 		const { data, error } = await supabase
 			.from('consultas')
 			.update({
 				respuesta,
 				estado: 'Respondida',
+				id_abogado: idAbogado,
+				updated_at: new Date().toISOString(),
 				responded_at: new Date().toISOString()
 			})
 			.eq('id_consulta', idConsulta)
