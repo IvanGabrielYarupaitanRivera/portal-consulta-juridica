@@ -5,17 +5,27 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
 	import type { GetConsulta } from '$lib/database/consultas/type.js';
+	import ResponderConsultaModal from '$lib/components/modals/consultas/ResponderConsultaModal.svelte';
 
 	let { data } = $props();
-	let { consultas } = data;
+	let { consultas } = $derived(data);
 	let showDeleteConsultaModal = $state(false);
+	let showResponderConsultaModal = $state(false);
 	let notificationSystem: NotificationSystem;
 	let selectedConsulta: GetConsulta | undefined = $state(undefined);
 
-	const handleAction = (action: 'showDeleteConsultaModal', consulta?: GetConsulta) => {
+	const handleAction = (
+		action: 'showDeleteConsultaModal' | 'showResponderConsultaModal',
+		consulta?: GetConsulta
+	) => {
 		switch (action) {
 			case 'showDeleteConsultaModal':
 				showDeleteConsultaModal = true;
+				selectedConsulta = consulta;
+				break;
+
+			case 'showResponderConsultaModal':
+				showResponderConsultaModal = true;
 				selectedConsulta = consulta;
 				break;
 		}
@@ -36,6 +46,23 @@
 				showDeleteConsultaModal = false;
 			} else if (result.type === 'failure') {
 				notificationSystem.notify.error(result.data?.message || 'Error al eliminar la consulta');
+			}
+		};
+	};
+
+	const handleResponderConsulta = () => {
+		notificationSystem.notify.loading('Enviando respuesta...');
+
+		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
+			await update();
+			notificationSystem.notify.hideLoading();
+
+			if (result.type === 'success') {
+				notificationSystem.notify.success(result.data?.message || 'Respuesta enviada exitosamente');
+
+				showResponderConsultaModal = false;
+			} else if (result.type === 'failure') {
+				notificationSystem.notify.error(result.data?.message || 'Error al enviar la respuesta');
 			}
 		};
 	};
@@ -148,6 +175,9 @@
 						<div class="flex gap-2 sm:flex-row">
 							<button
 								class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 sm:w-auto"
+								onclick={() => {
+									handleAction('showResponderConsultaModal', consulta);
+								}}
 							>
 								<MessageSquare class="h-4 w-4" />
 								Responder
@@ -172,5 +202,12 @@
 
 <!-- Modal para eliminar consulta -->
 <DeleteConsultaModal bind:showDeleteConsultaModal {handleDeleteConsulta} {selectedConsulta} />
+
+<!-- Modal para responder consulta -->
+<ResponderConsultaModal
+	bind:showResponderConsultaModal
+	{selectedConsulta}
+	{handleResponderConsulta}
+/>
 
 <NotificationSystem bind:this={notificationSystem} />
