@@ -46,5 +46,23 @@ export const actions = {
 				message: err instanceof Error ? err.message : 'Error al eliminar la consulta.'
 			});
 		}
+	},
+
+	responderConsulta: async ({ request, locals }) => {
+		const { supabase } = locals;
+		const formData = await request.formData();
+
+		const id_consulta = formData.get('id_consulta') as string;
+		const respuesta = formData.get('respuesta') as string;
+
+		try {
+			await ConsultaDB.responderConsulta(supabase, id_consulta, respuesta);
+			return { success: true, message: 'Respuesta enviada exitosamente.' };
+		} catch (err) {
+			return fail(500, {
+				success: false,
+				message: err instanceof Error ? err.message : 'Error al responder la consulta.'
+			});
+		}
 	}
 } satisfies Actions;
