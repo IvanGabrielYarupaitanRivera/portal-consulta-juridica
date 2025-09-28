@@ -1,5 +1,6 @@
 import { ConsultaDB } from '$lib/database/consultas/db';
 import type { Consulta } from '$lib/database/consultas/type';
+import { UserDB } from '$lib/database/users/db';
 import { fail, type Actions } from '@sveltejs/kit';
 
 export const actions = {
@@ -27,6 +28,19 @@ export const actions = {
 			return fail(500, {
 				success: false,
 				message: err instanceof Error ? err.message : 'Error al crear la consulta.'
+			});
+		}
+	},
+
+	logout: async ({ locals: { supabase } }) => {
+		console.log('Logging out...');
+		try {
+			await UserDB.signOut(supabase);
+			return { success: true, message: 'Sesión cerrada' };
+		} catch (err) {
+			return fail(500, {
+				success: false,
+				message: err instanceof Error ? err.message : 'Error en el servidor'
 			});
 		}
 	}
