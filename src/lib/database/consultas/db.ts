@@ -100,5 +100,18 @@ export const ConsultaDB = {
 		}
 
 		return data as GetConsulta[];
+	},
+
+	async deleteConsulta(supabase: SupabaseClient, idConsulta: string) {
+		const { data, error } = await supabase
+			.from('consultas')
+			.delete()
+			.eq('id_consulta', idConsulta)
+			.select()
+			.single();
+		if (error) {
+			throw new Error('Error al eliminar la consulta: ' + error.message);
+		}
+		return data as Consulta;
 	}
 };
