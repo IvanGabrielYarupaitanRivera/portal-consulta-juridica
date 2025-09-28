@@ -19,8 +19,9 @@
 
 	const navLinks = $derived([
 		{ href: '/', label: 'Inicio' },
-		{ href: '/#consulta', label: 'Consulta' },
+		{ href: '/#consulta', label: 'Consultar' },
 		...(session ? [{ href: '/privado', label: 'Bandeja de entrada' }] : []),
+		...(!session ? [{ href: '/ver-consultas', label: 'Ver Consultas' }] : []),
 		...(!session ? [{ href: '/ingresar', label: 'Ingresar' }] : [])
 	]);
 
