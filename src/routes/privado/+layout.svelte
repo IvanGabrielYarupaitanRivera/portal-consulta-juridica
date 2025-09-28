@@ -1,7 +1,4 @@
 <script lang="ts">
-	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
-	import { Menu } from '@lucide/svelte';
-
 	let { children } = $props();
 </script>
 
