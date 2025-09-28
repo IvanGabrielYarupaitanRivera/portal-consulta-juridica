@@ -1,13 +1,67 @@
 <script lang="ts">
-	import { Clock, CheckCircle, MessageSquare, Search, Filter, User, Phone } from '@lucide/svelte';
+	import DeleteConsultaModal from '$lib/components/modals/consultas/DeleteConsultaModal.svelte';
+	import { Clock, CheckCircle, MessageSquare, User, Phone, Trash2 } from '@lucide/svelte';
+
+	import type { ActionResult } from '@sveltejs/kit';
+	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
+	import type { GetConsulta } from '$lib/database/consultas/type.js';
 
 	let { data } = $props();
 	let { consultas } = data;
+	let showDeleteConsultaModal = $state(false);
+	let notificationSystem: NotificationSystem;
+	let selectedConsulta: GetConsulta | undefined = $state(undefined);
 
-	let filtro = $state('todas');
-	let busqueda = $state('');
-	let consultaSeleccionada = $state(null);
-	let modalAbierto = $state(false);
+	const handleAction = (action: 'showDeleteConsultaModal', consulta?: GetConsulta) => {
+		switch (action) {
+			case 'showDeleteConsultaModal':
+				showDeleteConsultaModal = true;
+				selectedConsulta = consulta;
+				break;
+		}
+	};
+
+	const handleDeleteConsulta = () => {
+		notificationSystem.notify.loading('Eliminando consulta...');
+
+		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
+			await update();
+			notificationSystem.notify.hideLoading();
+
+			if (result.type === 'success') {
+				notificationSystem.notify.success(
+					result.data?.message || 'Consulta eliminada exitosamente'
+				);
+
+				showDeleteConsultaModal = false;
+			} else if (result.type === 'failure') {
+				notificationSystem.notify.error(result.data?.message || 'Error al eliminar la consulta');
+			}
+		};
+	};
+
+	export function tiempoTranscurrido(created_at: string | null | undefined): string {
+		if (!created_at) return 'Fecha desconocida';
+
+		const ahora = new Date();
+		const fechaCreacion = new Date(created_at);
+		const diferenciaMilisegundos = ahora.getTime() - fechaCreacion.getTime();
+
+		const minutos = Math.floor(diferenciaMilisegundos / (1000 * 60));
+		const horas = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60));
+		const dias = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+
+		if (minutos < 1) return 'hace un momento';
+		if (minutos < 60) return `hace ${minutos} minuto${minutos === 1 ? '' : 's'}`;
+		if (horas < 24) return `hace ${horas} hora${horas === 1 ? '' : 's'}`;
+		if (dias < 7) return `hace ${dias} día${dias === 1 ? '' : 's'}`;
+
+		return fechaCreacion.toLocaleDateString('es-ES', {
+			day: 'numeric',
+			month: 'short',
+			year: fechaCreacion.getFullYear() !== ahora.getFullYear() ? 'numeric' : undefined
+		});
+	}
 </script>
 
 <!-- Header de la Bandeja -->
@@ -19,52 +73,7 @@
 				class="flex items-center gap-2 rounded-full bg-yellow-50 px-3 py-1 ring-1 ring-yellow-200"
 			>
 				<Clock class="h-4 w-4 text-yellow-600" />
-				<span class="text-sm font-medium text-yellow-700"
-					>Consultas Pendientes: {consultas.length}</span
-				>
-			</div>
-		</div>
-
-		<!-- Filtros y Búsqueda -->
-		<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-			<div class="relative flex items-center">
-				<Search class="absolute left-3 h-4 w-4 text-gray-400" />
-				<input
-					type="text"
-					placeholder="Buscar por nombre o contenido..."
-					bind:value={busqueda}
-					class="cursor-pointer rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-sm text-gray-900 placeholder-gray-500 transition-colors focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none"
-				/>
-			</div>
-
-			<div class="flex rounded-lg border border-gray-200 bg-gray-50 p-1">
-				<button
-					onclick={() => (filtro = 'todas')}
-					class="cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors {filtro ===
-					'todas'
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'text-gray-600 hover:text-gray-900'}"
-				>
-					Todas
-				</button>
-				<button
-					onclick={() => (filtro = 'pendientes')}
-					class="cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors {filtro ===
-					'pendientes'
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'text-gray-600 hover:text-gray-900'}"
-				>
-					Pendientes
-				</button>
-				<button
-					onclick={() => (filtro = 'respondidas')}
-					class="cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors {filtro ===
-					'respondidas'
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'text-gray-600 hover:text-gray-900'}"
-				>
-					Respondidas
-				</button>
+				<span class="text-sm font-medium text-yellow-700">Consultas: {consultas.length}</span>
 			</div>
 		</div>
 	</div>
@@ -82,99 +91,27 @@
 			<p class="text-sm text-gray-500">Las nuevas consultas aparecerán aquí</p>
 		</div>
 	{:else}
-		<!-- Lista de Consultas Unificada -->
-		<div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200">
+		<!-- Lista de Consultas Adaptable -->
+		<div class="space-y-4">
 			{#each consultas as consulta}
-				<!-- Mobile Card / Desktop Row -->
-				<div
-					class="border-b border-gray-200 p-4 transition-colors last:border-b-0 hover:bg-gray-50 lg:table-row lg:p-0"
+				<article
+					class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50"
 				>
-					<!-- Mobile Layout -->
-					<div class="lg:hidden">
-						<!-- Header Mobile -->
-						<div class="mb-3 flex items-start justify-between">
-							<div class="flex items-center gap-3">
-								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-									<User class="h-5 w-5 text-gray-600" />
-								</div>
-								<div>
-									<h3 class="font-medium text-gray-900">{consulta.nombre}</h3>
-									<time class="text-xs text-gray-500">hace 2 horas</time>
-								</div>
-							</div>
-
-							<!-- Estado Badge Mobile -->
-							<div
-								class="flex items-center gap-1 rounded-full px-2 py-1 {consulta.estado ===
-								'Pendiente'
-									? 'bg-yellow-50 text-yellow-700'
-									: 'bg-green-50 text-green-700'}"
-							>
-								{#if consulta.estado === 'Pendiente'}
-									<Clock class="h-3 w-3" />
-									<span class="text-xs font-medium">Pendiente</span>
-								{:else}
-									<CheckCircle class="h-3 w-3" />
-									<span class="text-xs font-medium">Respondida</span>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Contenido Mobile -->
-						<div class="mb-3">
-							<p class="line-clamp-3 text-sm text-gray-700">{consulta.mensaje}</p>
-						</div>
-
-						<!-- WhatsApp Mobile -->
-						{#if consulta.whatsapp}
-							<div class="mb-3 flex items-center gap-2 rounded-md bg-gray-50 p-2">
-								<Phone class="h-4 w-4 text-gray-500" />
-								<span class="text-sm text-gray-700">{consulta.whatsapp}</span>
-							</div>
-						{/if}
-
-						<!-- Acción Mobile -->
-						<button
-							onclick={() => {
-								consultaSeleccionada = consulta;
-								modalAbierto = true;
-							}}
-							class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
-						>
-							<MessageSquare class="h-4 w-4" />
-							Responder
-						</button>
-					</div>
-
-					<!-- Desktop Layout (Table Cells) -->
-					<div class="hidden lg:table-cell lg:px-6 lg:py-4">
+					<!-- Header de la consulta -->
+					<div class="mb-3 flex items-start justify-between">
 						<div class="flex items-center gap-3">
-							<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
-								<User class="h-4 w-4 text-gray-600" />
+							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+								<User class="h-5 w-5 text-gray-600" />
 							</div>
-							<span class="font-medium text-gray-900">{consulta.nombre}</span>
+							<div>
+								<h3 class="font-medium text-gray-900">{consulta.nombre}</h3>
+								<time class="text-xs text-gray-500">{tiempoTranscurrido(consulta.created_at)}</time>
+							</div>
 						</div>
-					</div>
 
-					<div class="hidden lg:table-cell lg:max-w-xs lg:px-6 lg:py-4">
-						<p class="truncate text-sm text-gray-700">{consulta.mensaje}</p>
-					</div>
-
-					<div class="hidden lg:table-cell lg:px-6 lg:py-4">
-						{#if consulta.whatsapp}
-							<div class="flex items-center gap-2">
-								<Phone class="h-4 w-4 text-gray-500" />
-								<span class="text-sm text-gray-700">{consulta.whatsapp}</span>
-							</div>
-						{:else}
-							<span class="text-sm text-gray-500">No disponible</span>
-						{/if}
-					</div>
-
-					<div class="hidden lg:table-cell lg:px-6 lg:py-4">
+						<!-- Badge de Estado -->
 						<div
-							class="inline-flex items-center gap-1 rounded-full px-2 py-1 {consulta.estado ===
-							'Pendiente'
+							class="flex items-center gap-1 rounded-full px-2 py-1 {consulta.estado === 'Pendiente'
 								? 'bg-yellow-50 text-yellow-700'
 								: 'bg-green-50 text-green-700'}"
 						>
@@ -188,60 +125,52 @@
 						</div>
 					</div>
 
-					<div class="hidden lg:table-cell lg:px-6 lg:py-4">
-						<time class="text-sm text-gray-500">hace 2 horas</time>
+					<!-- Contenido de la consulta -->
+					<div class="mb-3">
+						<p class="text-sm text-gray-700 lg:max-w-2xl lg:truncate">{consulta.mensaje}</p>
 					</div>
 
-					<div class="hidden lg:table-cell lg:px-6 lg:py-4">
-						<button
-							onclick={() => {
-								consultaSeleccionada = consulta;
-								modalAbierto = true;
-							}}
-							class="inline-flex cursor-pointer items-center gap-2 rounded-md bg-yellow-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
-						>
-							<MessageSquare class="h-4 w-4" />
-							Responder
-						</button>
+					<!-- Información de contacto y acción -->
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<!-- WhatsApp -->
+						<div class="flex items-center gap-2">
+							{#if consulta.whatsapp}
+								<div class="flex items-center gap-2 rounded-md bg-green-50 px-2 py-1">
+									<Phone class="h-4 w-4 text-green-500" />
+									<span class="text-sm text-green-700">{consulta.whatsapp}</span>
+								</div>
+							{:else}
+								<span class="text-sm text-green-500">Sin WhatsApp</span>
+							{/if}
+						</div>
+
+						<!-- Acción -->
+						<div class="flex gap-2 sm:flex-row">
+							<button
+								class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 sm:w-auto"
+							>
+								<MessageSquare class="h-4 w-4" />
+								Responder
+							</button>
+
+							<button
+								class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 sm:w-auto"
+								onclick={() => {
+									handleAction('showDeleteConsultaModal', consulta);
+								}}
+							>
+								<Trash2 class="h-4 w-4" />
+								Eliminar
+							</button>
+						</div>
 					</div>
-				</div>
+				</article>
 			{/each}
-
-			<!-- Desktop Table Header (Hidden on Mobile) -->
-			<div class="hidden bg-gray-50 lg:table-header-group">
-				<div class="lg:table-row">
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						Consultante
-					</div>
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						Consulta
-					</div>
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						WhatsApp
-					</div>
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						Estado
-					</div>
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						Fecha
-					</div>
-					<div
-						class="lg:table-cell lg:px-6 lg:py-3 lg:text-left lg:text-xs lg:font-medium lg:tracking-wider lg:text-gray-500 lg:uppercase"
-					>
-						Acciones
-					</div>
-				</div>
-			</div>
 		</div>
 	{/if}
 </main>
+
+<!-- Modal para eliminar consulta -->
+<DeleteConsultaModal bind:showDeleteConsultaModal {handleDeleteConsulta} {selectedConsulta} />
+
+<NotificationSystem bind:this={notificationSystem} />
