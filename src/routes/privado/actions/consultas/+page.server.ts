@@ -22,6 +22,17 @@ export const actions = {
 
 		try {
 			await ConsultaDB.createConsulta(supabase, consulta);
+
+			await fetch('https://flow.junin360.com/webhook/b66c78e6-1438-479a-9873-9e4e9439c0ed', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					nombre: consulta.nombre,
+					whatsapp: consulta.whatsapp,
+					consulta: consulta.mensaje
+				})
+			});
+
 			return { success: true, message: 'Su consulta ha sido registrada exitosamente.' };
 		} catch (err) {
 			return fail(500, {
