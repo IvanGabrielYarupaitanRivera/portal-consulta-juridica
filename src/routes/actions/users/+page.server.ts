@@ -34,7 +34,6 @@ export const actions = {
 	},
 
 	logout: async ({ locals: { supabase } }) => {
-		console.log('Logging out...');
 		try {
 			await UserDB.signOut(supabase);
 			return { success: true, message: 'Sesión cerrada' };
