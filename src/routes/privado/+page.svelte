@@ -99,11 +99,9 @@
 	<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 		<div class="flex items-center gap-4">
 			<h1 class="text-2xl font-bold text-gray-900">Bandeja de Entrada</h1>
-			<div
-				class="flex items-center gap-2 rounded-full bg-yellow-50 px-3 py-1 ring-1 ring-yellow-200"
-			>
-				<Clock class="h-4 w-4 text-yellow-600" />
-				<span class="text-sm font-medium text-yellow-700">Consultas: {consultas.length}</span>
+			<div class="flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 ring-1 ring-green-200">
+				<Clock class="h-4 w-4 text-green-600" />
+				<span class="text-sm font-medium text-green-700">Consultas: {consultas.length}</span>
 			</div>
 		</div>
 		<div>
