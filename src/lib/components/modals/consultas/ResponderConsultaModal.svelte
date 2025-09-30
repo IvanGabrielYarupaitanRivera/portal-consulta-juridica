@@ -3,7 +3,6 @@
 	import { X, XCircle } from '@lucide/svelte';
 	import { blur } from 'svelte/transition';
 	import ConfirmExitModal from '../ConfirmExitModal.svelte';
-	import type { ActionResult } from '@sveltejs/kit';
 
 	let {
 		handleResponderConsulta,
