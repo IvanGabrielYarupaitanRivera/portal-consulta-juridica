@@ -100,6 +100,15 @@
 									value={selectedConsulta?.id_consulta ?? ''}
 								/>
 
+								<!-- Whatsapp oculto -->
+								<input type="hidden" name="whatsapp" value={selectedConsulta?.whatsapp ?? ''} />
+
+								<!-- Nombre oculto -->
+								<input type="hidden" name="nombre" value={selectedConsulta?.nombre ?? ''} />
+
+								<!-- Mensaje oculto -->
+								<input type="hidden" name="mensaje" value={selectedConsulta?.mensaje ?? ''} />
+
 								<!-- Nombre (solo lectura) -->
 								<div class="space-y-1.5">
 									<label
@@ -111,7 +120,6 @@
 									<input
 										id="respond-consulta-nombre"
 										type="text"
-										disabled
 										value={selectedConsulta?.nombre ?? ''}
 										class="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700"
 									/>
