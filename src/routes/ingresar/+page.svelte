@@ -26,7 +26,7 @@
 	};
 </script>
 
-<div class="mx-auto mt-12 max-w-md">
+<div class="mx-auto mt-12 max-w-md px-4">
 	<div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-gray-200">
 		<!-- Header -->
 		<div class="bg-gradient-to-r from-yellow-50 to-yellow-100 px-6 py-6 text-center">
