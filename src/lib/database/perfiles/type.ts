@@ -2,6 +2,7 @@ export const PERFIL_ROL = [
 	'Militante',
 	'Secretario',
 	'Secretaria',
+	'Abogado',
 	'Administrador',
 	'Comando'
 ] as const;
