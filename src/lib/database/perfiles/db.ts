@@ -23,7 +23,7 @@ export const PerfilDB = {
 			throw new Error('Error al leer el perfil: ' + error.message);
 		}
 
-		return data;
+		return data as Perfil;
 	},
 
 	async readRolByIdUsuario(supabase: SupabaseClient, id_usuario: string) {
