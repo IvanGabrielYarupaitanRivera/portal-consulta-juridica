@@ -17,7 +17,7 @@
 
 	let {
 		title = 'Portal de Consulta Jurídica',
-		description = 'Obtén asesoramiento legal rápido y sencillo. Haz preguntas sobre temas jurídicos sin necesidad de registrarte y recibe respuestas claras y concisas.',
+		description = 'Obtén asesoramiento legal profesional y respuestas a tus preguntas jurídicas de manera rápida y confiable. Consulta con abogados calificados en nuestro portal.',
 		keywords = 'consulta jurídica, asesoramiento legal, preguntas legales, derecho, abogados, Perú, consultas gratuitas',
 		author = 'Portal de Consulta Jurídica',
 		type = 'website',
