@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DeleteConsultaModal from '$lib/components/modals/consultas/DeleteConsultaModal.svelte';
-	import { Clock, CheckCircle, MessageSquare, User, Phone, Trash2 } from '@lucide/svelte';
+	import { Clock, CheckCircle, MessageSquare, User, Phone, Trash2, Plus } from '@lucide/svelte';
 
 	import type { ActionResult } from '@sveltejs/kit';
 	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
@@ -81,11 +81,19 @@
 				<span class="text-sm font-medium text-yellow-700">Consultas: {consultas.length}</span>
 			</div>
 		</div>
+		<div>
+			<button
+				class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
+			>
+				<Plus class="h-4 w-4" />
+				Realizar Consulta
+			</button>
+		</div>
 	</div>
 </header>
 
 <!-- Lista de Consultas -->
-<main class="p-6">
+<main class="py-4">
 	{#if consultas.length === 0}
 		<!-- Estado Vacío -->
 		<div class="flex flex-col items-center justify-center py-16 text-center">
