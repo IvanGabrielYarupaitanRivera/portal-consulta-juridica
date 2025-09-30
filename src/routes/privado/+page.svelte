@@ -10,7 +10,7 @@
 	import CreateConsultaModal from '$lib/components/modals/consultas/CreateConsultaModal.svelte';
 
 	let { data } = $props();
-	let { consultas } = $derived(data);
+	let { consultas, rol } = $derived(data);
 	let showDeleteConsultaModal = $state(false);
 	let showResponderConsultaModal = $state(false);
 	let showCreateConsultaModal = $state(false);
@@ -134,78 +134,99 @@
 		<div class="space-y-4">
 			{#each consultas as consulta}
 				<article
-					class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50"
+					class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50"
 				>
 					<!-- Header de la consulta -->
-					<div class="mb-3 flex items-start justify-between">
+					<header class="mb-4 flex items-start justify-between">
 						<div class="flex items-center gap-3">
 							<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
 								<User class="h-5 w-5 text-gray-600" />
 							</div>
-							<div>
-								<h3 class="font-medium text-gray-900">{consulta.nombre}</h3>
-								<time class="text-xs text-gray-500">{tiempoTranscurrido(consulta.created_at)}</time>
+							<div class="min-w-0 flex-1">
+								<h3 class="font-semibold text-gray-900">{consulta.nombre}</h3>
+								<div class="mt-1 flex items-center gap-2">
+									<time class="text-xs text-gray-500"
+										>{tiempoTranscurrido(consulta.created_at)}</time
+									>
+									{#if consulta.whatsapp}
+										<div
+											class="flex items-center gap-1 rounded-md bg-green-100 px-2 py-0.5 ring-1 ring-green-200"
+										>
+											<Phone class="h-3 w-3 text-green-600" />
+											<span class="text-xs font-medium text-green-700">{consulta.whatsapp}</span>
+										</div>
+									{/if}
+								</div>
 							</div>
 						</div>
 
-						<!-- Badge de Estado -->
+						<!-- Badge de Estado Mejorado -->
 						<div
-							class="flex items-center gap-1 rounded-full px-2 py-1 {consulta.estado === 'Pendiente'
-								? 'bg-yellow-50 text-yellow-700'
-								: 'bg-green-50 text-green-700'}"
+							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 ring-1 {consulta.estado ===
+							'Pendiente'
+								? 'bg-amber-50 text-amber-800 ring-amber-200'
+								: 'bg-emerald-50 text-emerald-800 ring-emerald-200'}"
 						>
 							{#if consulta.estado === 'Pendiente'}
-								<Clock class="h-3 w-3" />
-								<span class="text-xs font-medium">Pendiente</span>
+								<Clock class="h-4 w-4" />
+								<span class="text-sm font-semibold">Pendiente</span>
 							{:else}
-								<CheckCircle class="h-3 w-3" />
-								<span class="text-xs font-medium">Respondida</span>
+								<CheckCircle class="h-4 w-4" />
+								<span class="text-sm font-semibold">Respondida</span>
 							{/if}
 						</div>
-					</div>
+					</header>
 
-					<!-- Contenido de la consulta -->
-					<div class="mb-3">
-						<p class="text-sm text-gray-700 lg:max-w-2xl lg:truncate">{consulta.mensaje}</p>
-					</div>
+					<!-- Contenido Principal -->
+					<main class="space-y-4">
+						<!-- Consulta Original -->
+						<section>
+							<h4 class="mb-2 text-sm font-medium text-gray-900">Consulta:</h4>
+							<div class="rounded-lg bg-gray-50 p-3">
+								<p class="text-sm text-gray-700">{consulta.mensaje}</p>
+							</div>
+						</section>
 
-					<!-- Información de contacto y acción -->
-					<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<!-- WhatsApp -->
-						<div class="flex items-center gap-2">
-							{#if consulta.whatsapp}
-								<div class="flex items-center gap-2 rounded-md bg-green-50 px-2 py-1">
-									<Phone class="h-4 w-4 text-green-500" />
-									<span class="text-sm text-green-700">{consulta.whatsapp}</span>
+						<!-- Respuesta (si existe) -->
+						{#if consulta.respuesta}
+							<section>
+								<h4 class="mb-2 text-sm font-medium text-gray-900">Respuesta:</h4>
+								<div class="rounded-lg bg-yellow-50 p-3 ring-1 ring-yellow-200">
+									<p class="text-sm text-gray-700">{consulta.respuesta}</p>
 								</div>
-							{:else}
-								<span class="text-sm text-green-500">Sin WhatsApp</span>
+							</section>
+						{/if}
+					</main>
+
+					<!-- Footer: Información de contacto y acciones -->
+					<footer class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<!-- Acciones -->
+						<div class="flex gap-2 sm:flex-row">
+							{#if rol === 'Abogado' || rol === 'Administrador'}
+								<button
+									class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 sm:w-auto"
+									onclick={() => {
+										handleAction('showResponderConsultaModal', consulta);
+									}}
+								>
+									<MessageSquare class="h-4 w-4" />
+									{consulta.respuesta ? 'Editar Respuesta' : 'Responder'}
+								</button>
+							{/if}
+
+							{#if rol === 'Administrador'}
+								<button
+									class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 sm:w-auto"
+									onclick={() => {
+										handleAction('showDeleteConsultaModal', consulta);
+									}}
+								>
+									<Trash2 class="h-4 w-4" />
+									Eliminar
+								</button>
 							{/if}
 						</div>
-
-						<!-- Acción -->
-						<div class="flex gap-2 sm:flex-row">
-							<button
-								class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 sm:w-auto"
-								onclick={() => {
-									handleAction('showResponderConsultaModal', consulta);
-								}}
-							>
-								<MessageSquare class="h-4 w-4" />
-								Responder
-							</button>
-
-							<button
-								class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 sm:w-auto"
-								onclick={() => {
-									handleAction('showDeleteConsultaModal', consulta);
-								}}
-							>
-								<Trash2 class="h-4 w-4" />
-								Eliminar
-							</button>
-						</div>
-					</div>
+					</footer>
 				</article>
 			{/each}
 		</div>
