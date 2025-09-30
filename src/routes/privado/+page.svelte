@@ -7,22 +7,28 @@
 	import type { GetConsulta } from '$lib/database/consultas/type.js';
 	import ResponderConsultaModal from '$lib/components/modals/consultas/ResponderConsultaModal.svelte';
 	import { tiempoTranscurrido } from '$lib/utils/time.js';
+	import CreateConsultaModal from '$lib/components/modals/consultas/CreateConsultaModal.svelte';
 
 	let { data } = $props();
 	let { consultas } = $derived(data);
 	let showDeleteConsultaModal = $state(false);
 	let showResponderConsultaModal = $state(false);
+	let showCreateConsultaModal = $state(false);
 	let notificationSystem: NotificationSystem;
 	let selectedConsulta: GetConsulta | undefined = $state(undefined);
 
 	const handleAction = (
-		action: 'showDeleteConsultaModal' | 'showResponderConsultaModal',
+		action: 'showDeleteConsultaModal' | 'showResponderConsultaModal' | 'showCreateConsultaModal',
 		consulta?: GetConsulta
 	) => {
 		switch (action) {
 			case 'showDeleteConsultaModal':
 				showDeleteConsultaModal = true;
 				selectedConsulta = consulta;
+				break;
+
+			case 'showCreateConsultaModal':
+				showCreateConsultaModal = true;
 				break;
 
 			case 'showResponderConsultaModal':
@@ -67,6 +73,25 @@
 			}
 		};
 	};
+
+	const handleCreateConsulta = () => {
+		notificationSystem.notify.loading('Creando su consulta...');
+
+		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
+			await update();
+			notificationSystem.notify.hideLoading();
+
+			if (result.type === 'success') {
+				notificationSystem.notify.success(
+					result.data?.message || 'Su consulta ha sido creada exitosamente'
+				);
+
+				showCreateConsultaModal = false;
+			} else if (result.type === 'failure') {
+				notificationSystem.notify.error(result.data?.message || 'Error al crear la consulta');
+			}
+		};
+	};
 </script>
 
 <!-- Header de la Bandeja -->
@@ -84,6 +109,9 @@
 		<div>
 			<button
 				class="flex cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
+				onclick={() => {
+					handleAction('showCreateConsultaModal');
+				}}
 			>
 				<Plus class="h-4 w-4" />
 				Realizar Consulta
@@ -188,6 +216,9 @@
 
 <!-- Modal para eliminar consulta -->
 <DeleteConsultaModal bind:showDeleteConsultaModal {handleDeleteConsulta} {selectedConsulta} />
+
+<!-- Modal para crear consultas -->
+<CreateConsultaModal bind:showCreateConsultaModal {handleCreateConsulta} />
 
 <!-- Modal para responder consulta -->
 <ResponderConsultaModal
