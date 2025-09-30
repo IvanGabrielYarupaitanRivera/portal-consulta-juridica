@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import NotificationSystem from '$lib/components/NotificationSystem.svelte';
-	import { Send, Scale, Clock, Shield } from '@lucide/svelte';
+	import { Send, Scale, Clock, Shield, LogIn } from '@lucide/svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 
 	let nombre = $state('');
@@ -38,16 +38,27 @@
 		</div>
 
 		<h1 class="mb-6 text-4xl font-bold tracking-tight text-gray-900 lg:text-5xl">
-			Consulta Jurídica
+			Portal Privado de
 			<span class="bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent"
-				>Rápida</span
+				>Consulta Jurídica</span
 			>
 		</h1>
 
 		<p class="mx-auto mb-8 max-w-2xl text-lg text-gray-600">
-			Obtén asesoramiento legal profesional en minutos. Sin registro, sin complicaciones, solo
-			respuestas claras a tus consultas jurídicas.
+			Accede a asesoramiento legal profesional exclusivo para personal autorizado. Ingresa con tus
+			credenciales para hacer consultas y recibir respuestas de abogados calificados.
 		</p>
+
+		<!-- Call to Action Button -->
+		<div class="mb-8">
+			<a
+				href="/ingresar"
+				class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-500 px-8 py-4 font-medium text-white shadow-sm transition-all hover:from-yellow-700 hover:to-yellow-600 hover:shadow-md focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none"
+			>
+				<LogIn class="h-5 w-5" />
+				Iniciar Sesión
+			</a>
+		</div>
 
 		<!-- Features -->
 		<div class="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
