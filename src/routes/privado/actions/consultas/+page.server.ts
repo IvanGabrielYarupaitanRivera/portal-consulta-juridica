@@ -64,10 +64,25 @@ export const actions = {
 		const formData = await request.formData();
 
 		const id_consulta = formData.get('id_consulta') as string;
+		const mensaje = formData.get('mensaje') as string;
 		const respuesta = formData.get('respuesta') as string;
+		const nombre = formData.get('nombre') as string;
+		const whatsapp = formData.get('whatsapp') as string | null;
 
 		try {
 			await ConsultaDB.responderConsulta(supabase, id_consulta, respuesta);
+
+			await fetch('https://flow.junin360.com/webhook/ebddfca7-1d7c-4568-8c42-d5c4c9e0d9ec', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					nombre: nombre,
+					whatsapp: whatsapp,
+					mensaje: mensaje,
+					respuesta: respuesta
+				})
+			});
+
 			return { success: true, message: 'Respuesta enviada exitosamente.' };
 		} catch (err) {
 			return fail(500, {
